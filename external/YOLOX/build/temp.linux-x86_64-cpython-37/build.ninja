@@ -1,0 +1,20 @@
+ninja_required_version = 1.3
+cxx = c++
+
+cflags = -pthread -B /home/vukasin/anaconda3/envs/BoostTrack/compiler_compat -Wl,--sysroot=/ -Wsign-compare -DNDEBUG -g -fwrapv -O3 -Wall -Wstrict-prototypes -fPIC -Iyolox/layers/cocoeval -I/home/vukasin/anaconda3/envs/BoostTrack/lib/python3.7/site-packages/torch/include -I/home/vukasin/anaconda3/envs/BoostTrack/lib/python3.7/site-packages/torch/include/torch/csrc/api/include -I/home/vukasin/anaconda3/envs/BoostTrack/lib/python3.7/site-packages/torch/include/TH -I/home/vukasin/anaconda3/envs/BoostTrack/lib/python3.7/site-packages/torch/include/THC -I/home/vukasin/anaconda3/envs/BoostTrack/include/python3.7m -c
+post_cflags = -O3 -std=c++14 -g -Wno-reorder -DTORCH_API_INCLUDE_EXTENSION_H '-DPYBIND11_COMPILER_TYPE="_gcc"' '-DPYBIND11_STDLIB="_libstdcpp"' '-DPYBIND11_BUILD_ABI="_cxxabi1011"' -DTORCH_EXTENSION_NAME=fast_cocoeval -D_GLIBCXX_USE_CXX11_ABI=0
+ldflags = 
+
+rule compile
+  command = $cxx -MMD -MF $out.d $cflags -c $in -o $out $post_cflags
+  depfile = $out.d
+  deps = gcc
+
+
+
+build /home/vukasin/BoostTrack/external/YOLOX/build/temp.linux-x86_64-cpython-37/yolox/layers/cocoeval/cocoeval.o: compile /home/vukasin/BoostTrack/external/YOLOX/yolox/layers/cocoeval/cocoeval.cpp
+
+
+
+
+

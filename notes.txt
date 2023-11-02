@@ -1,0 +1,6 @@
+#Export env as yml
+conda env export > boost-track-env.yml
+# Create env from yml
+conda env create -f boost-track-env.yml
+# activate env
+conda activate <env name from yml file>

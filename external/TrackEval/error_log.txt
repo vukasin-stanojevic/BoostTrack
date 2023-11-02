@@ -1,0 +1,56 @@
+MotChallenge2DBox
+e-80-30-30-0-0_post
+Traceback (most recent call last):
+  File "/home/vukasin/Deep-OC-SORT/external/TrackEval/trackeval/datasets/mot_challenge_2d_box.py", line 316, in _load_raw_file
+    time_data = np.asarray(read_data[time_key], dtype=np.float32)
+ValueError: setting an array element with a sequence. The requested array has an inhomogeneous shape after 1 dimensions. The detected shape was (174,) + inhomogeneous part.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/vukasin/Deep-OC-SORT/external/TrackEval/trackeval/eval.py", line 104, in evaluate
+    res[curr_seq] = eval_sequence(
+  File "/home/vukasin/Deep-OC-SORT/external/TrackEval/trackeval/_timing.py", line 17, in wrap
+    result = f(*args, **kw)
+  File "/home/vukasin/Deep-OC-SORT/external/TrackEval/trackeval/eval.py", line 264, in eval_sequence
+    raw_data = dataset.get_raw_seq_data(tracker, seq)
+  File "/home/vukasin/Deep-OC-SORT/external/TrackEval/trackeval/_timing.py", line 17, in wrap
+    result = f(*args, **kw)
+  File "/home/vukasin/Deep-OC-SORT/external/TrackEval/trackeval/datasets/_base_dataset.py", line 93, in get_raw_seq_data
+    raw_tracker_data = self._load_raw_file(tracker, seq, is_gt=False)
+  File "/home/vukasin/Deep-OC-SORT/external/TrackEval/trackeval/datasets/mot_challenge_2d_box.py", line 324, in _load_raw_file
+    raise TrackEvalException(
+trackeval.utils.TrackEvalException: Cannot convert tracking data from tracker e-80-30-30-0-0_post, sequence MOT20-05 to float. Is data corrupted?
+
+
+
+
+
+MotChallenge2DBox
+e-80-30-30-0-0_post
+Traceback (most recent call last):
+  File "/home/vukasin/Deep-OC-SORT/external/TrackEval/trackeval/datasets/mot_challenge_2d_box.py", line 316, in _load_raw_file
+    time_data = np.asarray(read_data[time_key], dtype=np.float32)
+ValueError: setting an array element with a sequence. The requested array has an inhomogeneous shape after 1 dimensions. The detected shape was (174,) + inhomogeneous part.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/vukasin/Deep-OC-SORT/external/TrackEval/trackeval/eval.py", line 104, in evaluate
+    res[curr_seq] = eval_sequence(
+  File "/home/vukasin/Deep-OC-SORT/external/TrackEval/trackeval/_timing.py", line 17, in wrap
+    result = f(*args, **kw)
+  File "/home/vukasin/Deep-OC-SORT/external/TrackEval/trackeval/eval.py", line 264, in eval_sequence
+    raw_data = dataset.get_raw_seq_data(tracker, seq)
+  File "/home/vukasin/Deep-OC-SORT/external/TrackEval/trackeval/_timing.py", line 17, in wrap
+    result = f(*args, **kw)
+  File "/home/vukasin/Deep-OC-SORT/external/TrackEval/trackeval/datasets/_base_dataset.py", line 93, in get_raw_seq_data
+    raw_tracker_data = self._load_raw_file(tracker, seq, is_gt=False)
+  File "/home/vukasin/Deep-OC-SORT/external/TrackEval/trackeval/datasets/mot_challenge_2d_box.py", line 324, in _load_raw_file
+    raise TrackEvalException(
+trackeval.utils.TrackEvalException: Cannot convert tracking data from tracker e-80-30-30-0-0_post, sequence MOT20-05 to float. Is data corrupted?
+
+
+
+
+
