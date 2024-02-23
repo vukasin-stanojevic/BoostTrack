@@ -11,7 +11,7 @@ from yolox.data import ValTransform
 def get_mot_loader(dataset, test, data_dir="data", workers=4, size=(800, 1440)):
     # Different dataset paths
     if dataset == "mot17":
-        direc = "mot"
+        direc = "MOT17"
         if test:
             name = "test"
             annotation = "test.json"
