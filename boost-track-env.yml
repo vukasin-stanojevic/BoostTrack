@@ -1,4 +1,4 @@
-name: torch-2.1.0-3.8.1-test
+name: boostTrack
 channels:
   - pytorch
   - nvidia
@@ -142,4 +142,5 @@ dependencies:
       - tzdata==2023.3
       - yacs==0.1.8
       - yolox==0.3.0
+      - termcolor==2.1.0
 prefix: /home/aims/anaconda3/envs/torch-2.1.0-3.8.1
