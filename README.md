@@ -45,7 +45,9 @@ Due to numpy version error, single line of code in mapping.py file from onnx mod
 We use the same weights as [Deep OC-SORT](https://github.com/GerardMaggiolino/Deep-OC-SORT/tree/main). The weights can be downloaded from the [link](https://drive.google.com/drive/folders/15hZcR4bW_Z9hEaXXjeWhQl_jwRKllauG?usp=sharing).
 
 *2.1.* Download the weights and place to BoostTrack/external/weights folder.
+
 *2.2.* Download MOT17 and MOT20 datasets from the [MOT Challenge website](https://motchallenge.net/).
+
 *2.3.* Place the files under BoostTrack/data folder:
 ```
 data
