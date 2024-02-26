@@ -213,6 +213,7 @@ def main():
                 interval=interval,
                 tau=10.5
             )
+        print(f"Gradient boosting interpolation post-processing applied, saved to {post_folder_gbi}.")
 
 
 if __name__ == "__main__":
