@@ -76,7 +76,7 @@ class KalmanBoxTracker(object):
 
         if self.age < n:
             return coef ** (n - self.age)
-        return coef ** self.time_since_update
+        return coef ** (self.time_since_update-1)
 
     def update(self, bbox: np.ndarray, score: float = 0):
         """
@@ -201,8 +201,8 @@ class BoostTrack(object):
         confs = np.zeros((len(self.trackers), 1))
 
         for t in range(len(trks)):
-            confs[t] = self.trackers[t].get_confidence()
             pos = self.trackers[t].predict()[0]
+            confs[t] = self.trackers[t].get_confidence()
             trks[t] = [pos[0], pos[1], pos[2], pos[3], confs[t, 0]]
 
         if self.use_dlo_boost:
@@ -331,7 +331,7 @@ class BoostTrack(object):
                 mask = np.zeros_like(detections[:, 4], dtype=np.bool_)
                 mask[remaining_boxes] = True
 
-            detections[:, 4] = np.where(mask, np.maximum(detections[:, 4], self.det_thresh + 1e-4), detections[:, 4])
+            detections[:, 4] = np.where(mask, self.det_thresh + 1e-4, detections[:, 4])
         return detections
 
     def do_iou_confidence_boost(self, detections: np.ndarray) -> np.ndarray:
