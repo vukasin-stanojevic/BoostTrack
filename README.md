@@ -96,5 +96,11 @@ Our implementation is developed on top of publicly available codes. We thank aut
 
 If you find our work useful, please cite our paper: 
 ```
-@article{...}
+@article{stanojevic2024boostTrack,
+  title={BoostTrack: boosting the similarity measure and detection confidence for improved multiple object tracking},
+  author={Vukasin Stanojevic and Branimir Todorovic},
+  journal={Machine Vision and Applications},
+  year={2024},
+  doi={10.1007/s00138-024-01531-5}
+}
 ```
