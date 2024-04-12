@@ -1,6 +1,6 @@
 # BoostTrack
 
-> [**BoostTrack: Boosting the similarity measure and detection confidence for improved multiple object tracking**](https://link)
+> [**BoostTrack: Boosting the similarity measure and detection confidence for improved multiple object tracking**](https://doi.org/10.1007/s00138-024-01531-5)
 > 
 > Vukasin Stanojevic, Branimir Todorovic
 
