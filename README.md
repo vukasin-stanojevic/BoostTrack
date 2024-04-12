@@ -101,6 +101,7 @@ If you find our work useful, please cite our paper:
   author={Vukasin Stanojevic and Branimir Todorovic},
   journal={Machine Vision and Applications},
   year={2024},
+  volume={35},
   doi={10.1007/s00138-024-01531-5}
 }
 ```
