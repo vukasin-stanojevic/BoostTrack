@@ -4,7 +4,9 @@
 > 
 > Vukasin Stanojevic, Branimir Todorovic
 
- 
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/boosttrack-boosting-the-similarity-measure/multi-object-tracking-on-mot17)](https://paperswithcode.com/sota/multi-object-tracking-on-mot17?p=boosttrack-boosting-the-similarity-measure)
+
+
 <p align="center"><img src="assets/hotaplt.png" width="500"/><br>HOTA score on MOT17 and MOT20 datasets.</p>
 
 ## Abstract
