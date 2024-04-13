@@ -98,10 +98,12 @@ If you find our work useful, please cite our paper:
 ```
 @article{stanojevic2024boostTrack,
   title={BoostTrack: boosting the similarity measure and detection confidence for improved multiple object tracking},
-  author={Vukasin Stanojevic and Branimir Todorovic},
+  author={Stanojevic, Vukasin D and Todorovic, Branimir T},
   journal={Machine Vision and Applications},
+  issn = {0932-8092},
   year={2024},
   volume={35},
+  number = {3},
   doi={10.1007/s00138-024-01531-5}
 }
 ```
