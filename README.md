@@ -28,6 +28,7 @@ Handling unreliable detections and avoiding identity switches are crucial for th
 
 ## Installation
 We tested the code on Ubuntu 22.04.
+
 **Step 1.** Download repository and setup the conda environment.
 
 Note: g++ is required to install all the requirements.
