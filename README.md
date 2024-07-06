@@ -67,9 +67,9 @@ data
 python3 data/tools/convert_mot17_to_coco.py
 python3 data/tools/convert_mot20_to_coco.py
 ```
-## Training and evaluation
-### Train and evaluate BoostTrack
-To train the BoostTrack on MOT17 and MOT20 validation sets run the following:
+## Running the experiments and evaluation
+### Run BoostTrack
+To run the BoostTrack on MOT17 and MOT20 validation sets run the following:
 ```shell
 python main.py --dataset mot17 --exp_name BoostTrack --det_thresh 0.6 --dlo_boost_coef 0.65 --no_reid
 python main.py --dataset mot20 --exp_name BoostTrack --det_thresh 0.4 --dlo_boost_coef 0.5 --no_reid
@@ -81,8 +81,8 @@ To evaluate the results using TrackEval run:
 python external/TrackEval/scripts/run_mot_challenge.py   --SPLIT_TO_EVAL val   --GT_FOLDER results/gt/   --TRACKERS_FOLDER results/trackers/   --BENCHMARK MOT17  --TRACKERS_TO_EVAL BoostTrack_post_gbi
 python external/TrackEval/scripts/run_mot_challenge.py   --SPLIT_TO_EVAL val   --GT_FOLDER results/gt/   --TRACKERS_FOLDER results/trackers/   --BENCHMARK MOT20  --TRACKERS_TO_EVAL BoostTrack_post_gbi 
 ```
-### Train and evaluate BoostTrack+
-Similarly, to train the BoostTrack+ run:
+### Run BoostTrack+
+Similarly, to run the BoostTrack+ run:
 ```shell
 python main.py --dataset mot17 --exp_name BoostTrackPlus --det_thresh 0.6 --dlo_boost_coef 0.65
 python main.py --dataset mot20 --exp_name BoostTrackPlus --det_thresh 0.4 --dlo_boost_coef 0.5
