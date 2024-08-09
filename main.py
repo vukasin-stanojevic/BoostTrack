@@ -53,6 +53,7 @@ def get_main_args():
     parser.add_argument("--no_duo", action="store_true", help="mark if detecting unlikely objects step should NOT be performed")
     parser.add_argument("--no_cmc", action="store_true", help="mark if CMC should NOT be performed")
     parser.add_argument("--no_reid", action="store_true", help="mark if visual embedding should NOT be used")
+    parser.add_argument("--s_sim_corr", action="store_true", help="mark if you want to use corrected version of shape similarity calculation function")
     parser.add_argument("--min_box_area", type=float, default=10, help="filter out tiny boxes")
     parser.add_argument(
         "--aspect_ratio_thresh",
@@ -105,6 +106,9 @@ def main():
     detector_path, size = get_detector_path_and_im_size(args)
     det = detector.Detector("yolox", detector_path, args.dataset)
     loader = dataset.get_mot_loader(args.dataset, args.test_dataset, size=size)
+
+    from tracker.assoc import setup_s_sim_f
+    setup_s_sim_f(args.s_sim_corr)
 
     use_ecc = not args.no_cmc
     use_embedding = not args.no_reid
