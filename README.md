@@ -110,3 +110,25 @@ If you find our work useful, please cite our paper:
   doi={10.1007/s00138-024-01531-5}
 }
 ```
+
+## A bug notice:
+There is a bug in calculating shape similarity. 
+It is supposed to be calculated as 
+```math
+S^{shape}_{d_i, t_j} = c_{d_i, t_j} \cdot \exp \biggl(\frac{|D_i^w - T_j^w|}{\text{max}(D_i^w, T_j^w)}  + \frac{|D_i^h - T_j^h|}{\text{max}(D_i^h, T_j^h)}\biggr).
+```
+However, in the code, the equation is implemented (it is multiplied by detection-tracklet confidence later) as
+```
+np.exp(-(np.abs(dw - tw)/np.maximum(dw, tw) + np.abs(dh - th)/np.maximum(dw, tw)))
+```
+instead of 
+```
+np.exp(-(np.abs(dw - tw)/np.maximum(dw, tw) + np.abs(dh - th)/np.maximum(dh, th)))
+```
+Dividing both additions by the shorter dimension, i.e. width, penalizes shape mismatch more. Hyperparameters $\lambda_{IoU}, \lambda_{MhD}$ and $\lambda_{shape}$ are tuned to work with the original implementation, and using the correct implementation produces slightly worse results.
+For this reason, we keep the implementation with the bug as function shape_similarity_v1, used by the default, and we provide the correct implementation in function shape_similarity_v2 (see file assoc.py).
+Correct implementation can be used by passing the --s_sim_corr flag.
+
+Changing the shape similarity implementation affects the results. We provide new results corresponding to the tables 1, 2 and 3 in the [following response](https://github.com/vukasin-stanojevic/BoostTrack/issues/8).
+
+We thank Luong Duc Trong for detecting the bug.
