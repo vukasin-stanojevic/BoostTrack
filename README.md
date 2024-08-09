@@ -115,7 +115,7 @@ If you find our work useful, please cite our paper:
 There is a bug in calculating shape similarity. 
 It is supposed to be calculated as 
 ```math
-S^{shape}_{d_i, t_j} = c_{d_i, t_j} \cdot \exp \biggl(\frac{|D_i^w - T_j^w|}{\text{max}(D_i^w, T_j^w)}  + \frac{|D_i^h - T_j^h|}{\text{max}(D_i^h, T_j^h)}\biggr).
+S^{shape}_{d_i, t_j} = c_{d_i, t_j} \cdot \exp \biggl(-\big(\frac{|D_i^w - T_j^w|}{\text{max}(D_i^w, T_j^w)}  + \frac{|D_i^h - T_j^h|}{\text{max}(D_i^h, T_j^h)}\big)\biggr).
 ```
 However, in the code, the equation is implemented (it is multiplied by detection-tracklet confidence later) as
 ```
