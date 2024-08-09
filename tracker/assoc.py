@@ -4,30 +4,35 @@ from typing import Optional
 import lap
 import numpy as np
 from copy import deepcopy
-import scipy.spatial as sp
+
+s_sim_f = None
 
 
-def split_cosine_dist(dets, trks, affinity_thresh=0.55, pair_diff_thresh=0.6, hard_thresh=True):
+def setup_s_sim_f(use_corr_sim: bool):
+    '''
+    The function is used to chose which shape_similarity function should be used.
+    shape_similarity_v1() corresponds to originally implemented function used for generating results in
+    "BoostTrack: boosting the similarity measure and detection confidence for improved multiple object tracking".
+    However, there is a minor bug in the implementation.
+    Namely, instead of
+    np.exp(-(np.abs(dw - tw)/np.maximum(dw, tw) + np.abs(dh - th)/np.maximum(dw, tw))),
+    the function should return
+    np.exp(-(np.abs(dw - tw)/np.maximum(dw, tw) + np.abs(dh - th)/np.maximum(dh, th)))
+    to correspond to the equations 6 and 7 from the paper.
+    Parameters lambda_iou, lambda_mhd and lambda_shape are adjusted to work with this original version,
+    and corrected version produces slightly worse results.
+    The original version divides both additions with the width,
+    which is a smaller dimension then the height in pedestrian tracking,
+    thus penalizing shape mismatch more than the correct version.
+    Because the original version gives slightly better results, we provide implementation of
+    both versions and leave the users to chose which implementation should be used.
+    The default is to use original shape_similarity_v1 (which divides both additions with the width).
+    '''
+    global s_sim_f
+    s_sim_f = shape_similarity_v1 if not use_corr_sim else shape_similarity_v2
 
-    cos_dist = np.zeros((len(dets), len(trks)))
 
-    for i in range(len(dets)):
-        for j in range(len(trks)):
-
-            cos_d = 1 - sp.distance.cdist(dets[i], trks[j], "cosine")  ## shape = 3x3
-            patch_affinity = np.max(cos_d, axis=0)  ## shape = [3,]
-            # exp16 - Using Hard threshold
-            if hard_thresh:
-                if len(np.where(patch_affinity > affinity_thresh)[0]) != len(patch_affinity):
-                    cos_dist[i, j] = 0
-                else:
-                    cos_dist[i, j] = np.max(patch_affinity)
-            else:
-                cos_dist[i, j] = np.max(patch_affinity)  # can experiment with mean too (max works slightly better)
-
-    return cos_dist
-
-def shape_similarity(detects: np.ndarray, tracks: np.ndarray) -> np.ndarray:
+def shape_similarity_v1(detects: np.ndarray, tracks: np.ndarray) -> np.ndarray:
     if detects.size == 0 or tracks.size == 0:
         return np.zeros((0, 0))
 
@@ -36,6 +41,17 @@ def shape_similarity(detects: np.ndarray, tracks: np.ndarray) -> np.ndarray:
     tw = (tracks[:, 2] - tracks[:, 0]).reshape((1, -1))
     th = (tracks[:, 3] - tracks[:, 1]).reshape((1, -1))
     return np.exp(-(np.abs(dw - tw)/np.maximum(dw, tw) + np.abs(dh - th)/np.maximum(dw, tw)))
+
+
+def shape_similarity_v2(detects: np.ndarray, tracks: np.ndarray) -> np.ndarray:
+    if detects.size == 0 or tracks.size == 0:
+        return np.zeros((0, 0))
+
+    dw = (detects[:, 2] - detects[:, 0]).reshape((-1, 1))
+    dh = (detects[:, 3] - detects[:, 1]).reshape((-1, 1))
+    tw = (tracks[:, 2] - tracks[:, 0]).reshape((1, -1))
+    th = (tracks[:, 3] - tracks[:, 1]).reshape((1, -1))
+    return np.exp(-(np.abs(dw - tw)/np.maximum(dw, tw) + np.abs(dh - th)/np.maximum(dh, th)))
 
 def iou_batch(bboxes1, bboxes2):
     """
@@ -92,7 +108,7 @@ def linear_assignment(detections: np.ndarray, trackers: np.ndarray,
     # filter out matched with low IOU
     matches = []
     for m in matched_indices:
-        valid_match = iou_matrix[m[0], m[1]] >= threshold  or (False if emb_cost is None else (iou_matrix[m[0], m[1]] >= threshold / 2 and emb_cost[m[0], m[1]] >= 0.75))
+        valid_match = iou_matrix[m[0], m[1]] >= threshold or (False if emb_cost is None else (iou_matrix[m[0], m[1]] >= threshold / 2 and emb_cost[m[0], m[1]] >= 0.75))
         if valid_match:
             matches.append(m.reshape(1, 2))
         else:
@@ -151,7 +167,7 @@ def associate(
 
         cost_matrix += lambda_mhd * mahalanobis_distance
         if conf is not None:
-            cost_matrix += lambda_shape * conf * shape_similarity(detections, trackers)
+            cost_matrix += lambda_shape * conf * s_sim_f(detections, trackers)
 
     if emb_cost is not None:
         lambda_emb = 3
