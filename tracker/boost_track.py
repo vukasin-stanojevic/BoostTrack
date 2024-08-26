@@ -124,7 +124,7 @@ class KalmanBoxTracker(object):
         return self.emb
 
 
-class BoostTrackPlusPlus(object):
+class BoostTrack(object):
     def __init__(self, video_name: Optional[str] = None):
 
         self.frame_count = 0
