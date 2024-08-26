@@ -1,12 +1,9 @@
 """
 The Gradient Boosting Reconnection Context (GBRC)
 mechanism is developed to realize gradient-adaptive
-reconnection of the fragment tracks with trajectory drift-
-ing noise
+reconnection of the fragment tracks with trajectory drifting noise
 """
 import numpy as np
-from sklearn.gaussian_process.kernels import RBF
-from sklearn.gaussian_process import GaussianProcessRegressor as GPR
 from sklearn.ensemble import GradientBoostingRegressor
 
 
@@ -30,28 +27,17 @@ def LinearInterpolation(input_, interval):
     return output_
 
 
-def GradientBoostingSmooth(input_, tau):
+def GradientBoostingSmooth(input_):
     output_ = list()
-    MAE = []
-    MAE1 = []
     ids = set(input_[:, 1])
     for id_ in ids:
         tracks = input_[input_[:, 1] == id_]
-        len_scale = np.clip(tau * np.log(tau ** 3 / len(tracks)), tau ** -1, tau ** 2)
-        gpr = GPR(RBF(len_scale, 'fixed'))
         t = tracks[:, 0].reshape(-1, 1)
         x = tracks[:, 2].reshape(-1, 1)
         y = tracks[:, 3].reshape(-1, 1)
         w = tracks[:, 4].reshape(-1, 1)
         h = tracks[:, 5].reshape(-1, 1)
-        gpr.fit(t, x.ravel())
-        xx = gpr.predict(t)[:]
-        gpr.fit(t, y.ravel())
-        yy = gpr.predict(t)[:]
-        gpr.fit(t, w.ravel())
-        ww = gpr.predict(t)[:]
-        gpr.fit(t, h.ravel())
-        hh = gpr.predict(t)[:]
+
         regr = GradientBoostingRegressor(n_estimators=115,learning_rate=0.065,min_samples_split=6)#learning_rate=0.065,min_samples_split=6,n_estimators=71
         regr.fit(t, x.ravel())
         xx = regr.predict(t)
@@ -65,24 +51,16 @@ def GradientBoostingSmooth(input_, tau):
         regr.fit(t, h.ravel())
         hh = regr.predict(t)
         hh = hh.reshape(-1, 1)
-        MAE.append(np.sum((t-gpr.predict(x))**2)/len(t))
-        MAE1.append(np.sum((t - regr.predict(x)) ** 2) / len(t))
+
         output_.extend([
             [t[i, 0], id_, xx[i][0], yy[i][0], ww[i][0], hh[i][0], 1, -1, -1 , -1] for i in range(len(t))
         ])
-    # plt.plot(range(1,len(MAE)+1),MAE)
-    # plt.plot(range(1,len(MAE1)+1),MAE1,color ='green',linestyle='--')
-    # plt.ylabel('MAE')
-    # plt.legend(labels=('GSI', 'GBRC'))
-    # plt.show()
+
     return output_
 
 # GBI
-def GBInterpolation(path_in, path_out, interval, tau):
-    # input_ = np.loadtxt(path_in, delimiter=',')
-    # li = LinearInterpolation(input_, interval)
-    # path_in = path_in.replace("e2", "e2_post")
+def GBInterpolation(path_in, path_out, interval):
     input_ = np.loadtxt(path_in, delimiter=',')
     li = input_[np.lexsort([input_[:, 0], input_[:, 1]])]  # 按ID和帧排序
-    gbi = GradientBoostingSmooth(li, tau)
+    gbi = GradientBoostingSmooth(li)
     np.savetxt(path_out, gbi, fmt='%d,%d,%.2f,%.2f,%.2f,%.2f,%.2f,%d,%d,%d')

@@ -1,13 +1,16 @@
-# BoostTrack
+# BoostTrack/BoostTrack++ joint repository
 
 > [**BoostTrack: Boosting the similarity measure and detection confidence for improved multiple object tracking**](https://doi.org/10.1007/s00138-024-01531-5)
-> 
 > Vukasin Stanojevic, Branimir Todorovic
+> 
+> [**BoostTrack++: using tracklet information to detect more objects in multiple object tracking**](https://arxiv.org/abs/2408.13003)
+> Vukasin Stanojevic, Branimir Todorovic
+> 
 
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/boosttrack-boosting-the-similarity-measure/multi-object-tracking-on-mot17)](https://paperswithcode.com/sota/multi-object-tracking-on-mot17?p=boosttrack-boosting-the-similarity-measure)
 
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/boosttrack-boosting-the-similarity-measure/multi-object-tracking-on-mot20-1)](https://paperswithcode.com/sota/multi-object-tracking-on-mot20-1?p=boosttrack-boosting-the-similarity-measure)
-<p align="center"><img src="assets/hotaplt.png" width="500"/><br>HOTA score on MOT17 and MOT20 datasets.</p>
+<p align="center"><img src="assets/plts.jpg" width="500"/><br>HOTA score on MOT17 and MOT20 datasets.</p>
 
 ## Abstract
 Handling unreliable detections and avoiding identity switches are crucial for the success of multiple object tracking (MOT). Ideally, MOT algorithm should use true positive detections only, work in real-time and produce no identity switches. To approach the described ideal solution, we present the BoostTrack, a simple yet effective tracing-by-detection MOT method that utilizes several lightweight plug and play additions to improve MOT performance. We design a detection-tracklet confidence score and use it to scale the similarity measure and implicitly favour high detection confidence and high tracklet confidence pairs in one-stage association. To reduce the ambiguity arising from using intersection over union (IoU), we propose a novel Mahalanobis distance and shape similarity additions to boost the overall similarity measure. To utilize low-detection score bounding boxes in one-stage association, we propose to boost the confidence scores of two groups of detections:  the detections we assume to correspond to the existing tracked object, and the detections we assume to correspond to a previously undetected object. The proposed additions are orthogonal to the existing approaches, and we combine them with interpolation and camera motion compensation to achieve results comparable to the standard benchmark solutions while retaining real-time execution speed. When combined with appearance similarity, our method outperforms all standard benchmark solutions on MOT17 and MOT20 datasets. It ranks first among online methods in HOTA metric in the MOT Challenge on MOT17 and MOT20 test sets. 
@@ -15,21 +18,23 @@ Handling unreliable detections and avoiding identity switches are crucial for th
 
 ## Tracking performance
 ### Results on MOT17 test set
-| Method      | HOTA   |  MOTA  |  IDF1  |  IDSW  |
-|-------------|--------|--------|--------|--------|
-| BoostTrack  |  65.4   |  80.5  |  80.2  | 1104 |
-| BoostTrack+ |  66.4   |  80.6  |  81.8  | 1086 |
+| Method       | HOTA    | MOTA   | IDF1   |  IDSW  |
+|--------------|---------|--------|--------|--------|
+| BoostTrack   | 65.4    | 80.5   | 80.2   | 1104 |
+| BoostTrack+  | 66.4    | 80.6   | 81.8   | 1086 |
+| BoostTrack++ | 66.6    | 80.7   | 82.2   | 1062 |
 
 ### Results on MOT20 test set
-| Method      | HOTA   |  MOTA  |  IDF1  |  IDSW  |
-|-------------|--------|--------|--------|--------|
-|BoostTrack   | 63   | 76.4 | 76.5 | 992 |
-|BoostTrack+  | 66.2 | 77.2 | 81.5 | 899 |
+| Method      | HOTA  | MOTA  |  IDF1  |  IDSW  |
+|-------------|-------|-------|--------|--------|
+|BoostTrack   | 63   | 76.4  | 76.5 | 992 |
+|BoostTrack+  | 66.2 | 77.2  | 81.5 | 899 |
+|BoostTrack++ | 66.4 | 77.7  | 82.0 | 762 |
 
 ## Installation
 We tested the code on Ubuntu 22.04.
 
-**Step 1.** Download repository and setup the conda environment.
+**Step 1.** Download repository and set up the conda environment.
 
 Note: g++ is required to install all the requirements.
 ```shell
@@ -43,7 +48,7 @@ Due to numpy version error, single line of code in mapping.py file from onnx mod
     int(TensorProto.STRING): np.dtype(object)
 ```
 
-**Step 2.** Download the model weights and setup the datasets.
+**Step 2.** Download the model weights and set up the datasets.
 
 We use the same weights as [Deep OC-SORT](https://github.com/GerardMaggiolino/Deep-OC-SORT/tree/main). The weights can be downloaded from the [link](https://drive.google.com/drive/folders/15hZcR4bW_Z9hEaXXjeWhQl_jwRKllauG?usp=sharing).
 
@@ -97,7 +102,7 @@ Our implementation is developed on top of publicly available codes. We thank aut
 
 # Citation
 
-If you find our work useful, please cite our paper: 
+If you find our work useful, please cite our papers: 
 ```
 @article{stanojevic2024boostTrack,
   title={BoostTrack: boosting the similarity measure and detection confidence for improved multiple object tracking},

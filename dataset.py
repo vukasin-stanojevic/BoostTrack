@@ -26,14 +26,6 @@ def get_mot_loader(dataset, test, data_dir="data", workers=4, size=(800, 1440)):
         else:
             name = "train"
             annotation = "val_half.json"
-    elif dataset == "dance":
-        direc = "dancetrack"
-        if test:
-            name = "test"
-            annotation = "test.json"
-        else:
-            annotation = "val.json"
-            name = "val"
     else:
         raise RuntimeError("Specify path here.")
 

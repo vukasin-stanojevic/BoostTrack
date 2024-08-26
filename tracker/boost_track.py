@@ -3,13 +3,16 @@
 """
 from __future__ import print_function
 
+import os
 from copy import deepcopy
 from typing import Optional, List
 
+import cv2
 import numpy as np
 
+from default_settings import GeneralSettings, BoostTrackSettings, BoostTrackPlusPlusSettings
 from tracker.embedding import EmbeddingComputer
-from tracker.assoc import associate, iou_batch
+from tracker.assoc import associate, iou_batch, MhDist_similarity, shape_similarity, soft_biou_batch
 from tracker.ecc import ECC
 from tracker.kalmanfilter import KalmanFilter
 
@@ -56,7 +59,6 @@ class KalmanBoxTracker(object):
     def __init__(self, bbox, emb: Optional[np.ndarray] = None):
         """
         Initialises a tracker using initial bounding box.
-
         """
 
         self.bbox_to_z_func = convert_bbox_to_z
@@ -106,7 +108,7 @@ class KalmanBoxTracker(object):
             self.hit_streak = 0
         self.time_since_update += 1
 
-        return self.x_to_bbox_func(self.kf.x)
+        return self.get_state()
 
     def get_state(self):
         """
@@ -122,51 +124,35 @@ class KalmanBoxTracker(object):
         return self.emb
 
 
-class BoostTrack(object):
-    def __init__(
-        self,
-        det_thresh: float,
-        lambda_iou: float = 0.5,
-        lambda_mhd: float = 0.25,
-        lambda_shape: float = 0.25,
-        use_dlo_boost: bool = True,
-        use_duo_boost: bool = True,
-        max_age: int = 30,
-        min_hits: int = 3,
-        iou_threshold: float = 0.3,
-        use_ecc: bool = False,
-        use_embedding: bool = False,
-        dlo_boost_coef: float = 0.65,
-        video_name: Optional[str] = None,
-        dataset_name: Optional[str] = None,
-        test_dataset: bool = False
-    ):
+class BoostTrackPlusPlus(object):
+    def __init__(self, video_name: Optional[str] = None):
 
-        self.max_age = max_age
-        self.iou_threshold = iou_threshold
-        self.trackers: List[KalmanBoxTracker] = []
         self.frame_count = 0
-        self.det_thresh = det_thresh
-        self.min_hits = min_hits
-        self.dlo_boost_coef = dlo_boost_coef
+        self.trackers: List[KalmanBoxTracker] = []
 
-        self.use_embedding = use_embedding
-        if self.use_embedding:
-            if dataset_name is None and test_dataset is None:
-                raise Exception("dataset_name and test_dataset must be specified when using visual embedding!")
-            self.embedder = EmbeddingComputer(dataset_name, test_dataset, True)
+        self.max_age = GeneralSettings.max_age(video_name)
+        self.iou_threshold = GeneralSettings['iou_threshold']
+        self.det_thresh = GeneralSettings['det_thresh']
+        self.min_hits = GeneralSettings['min_hits']
+
+        self.lambda_iou = BoostTrackSettings['lambda_iou']
+        self.lambda_mhd = BoostTrackSettings['lambda_mhd']
+        self.lambda_shape = BoostTrackSettings['lambda_shape']
+        self.use_dlo_boost = BoostTrackSettings['use_dlo_boost']
+        self.use_duo_boost = BoostTrackSettings['use_duo_boost']
+        self.dlo_boost_coef = BoostTrackSettings['dlo_boost_coef']
+
+        self.use_rich_s = BoostTrackPlusPlusSettings['use_rich_s']
+        self.use_sb = BoostTrackPlusPlusSettings['use_sb']
+        self.use_vt = BoostTrackPlusPlusSettings['use_vt']
+
+        if GeneralSettings['use_embedding']:
+            self.embedder = EmbeddingComputer(GeneralSettings['dataset'], GeneralSettings['test_dataset'], True)
         else:
             self.embedder = None
 
-        self.lambda_iou = lambda_iou
-        self.lambda_mhd = lambda_mhd
-        self.lambda_shape = lambda_shape
-
-        self.use_dlo_boost = use_dlo_boost
-        self.use_duo_boost = use_duo_boost
-        self.use_ecc = use_ecc
-        if use_ecc:
-            self.ecc = ECC(scale=350, video_name=video_name, use_cache=False)
+        if GeneralSettings['use_ecc']:
+            self.ecc = ECC(scale=350, video_name=video_name, use_cache=True)
         else:
             self.ecc = None
 
@@ -184,14 +170,13 @@ class BoostTrack(object):
             dets = dets.cpu().detach().numpy()
 
         self.frame_count += 1
-        mahalanobis_distance = None
 
         # Rescale
         scale = min(img_tensor.shape[2] / img_numpy.shape[0], img_tensor.shape[3] / img_numpy.shape[1])
         dets = deepcopy(dets)
         dets[:, :4] /= scale
 
-        if self.use_ecc:
+        if self.ecc is not None:
             transform = self.ecc(img_numpy, self.frame_count, tag)
             for trk in self.trackers:
                 trk.camera_update(transform)
@@ -206,19 +191,14 @@ class BoostTrack(object):
             trks[t] = [pos[0], pos[1], pos[2], pos[3], confs[t, 0]]
 
         if self.use_dlo_boost:
-            dets = self.do_iou_confidence_boost(dets)
+            dets = self.dlo_confidence_boost(dets, self.use_rich_s, self.use_sb, self.use_vt)
 
         if self.use_duo_boost:
-            dets = self.do_mh_dist_confidence_boost(dets)
+            dets = self.duo_confidence_boost(dets)
 
         remain_inds = dets[:, 4] >= self.det_thresh
         dets = dets[remain_inds]
         scores = dets[:, 4]
-
-        if mahalanobis_distance is not None and mahalanobis_distance.size > 0:
-            mahalanobis_distance = mahalanobis_distance[remain_inds]
-        else:
-            mahalanobis_distance = self.get_mh_dist_matrix(dets)
 
         # Generate embeddings
         dets_embs = np.ones((dets.shape[0], 1))
@@ -231,12 +211,13 @@ class BoostTrack(object):
             trk_embs = np.array(trk_embs)
             if trk_embs.size > 0 and dets.size > 0:
                 emb_cost = dets_embs.reshape(dets_embs.shape[0], -1) @ trk_embs.reshape((trk_embs.shape[0], -1)).T
+        emb_cost = None if self.embedder is None else emb_cost
 
-        matched, unmatched_dets, unmatched_trks = associate(
+        matched, unmatched_dets, unmatched_trks, sym_matrix = associate(
             dets,
             trks,
             self.iou_threshold,
-            mahalanobis_distance=mahalanobis_distance,
+            mahalanobis_distance=self.get_mh_dist_matrix(dets),
             track_confidence=confs,
             detection_confidence=scores,
             emb_cost=emb_cost,
@@ -274,15 +255,16 @@ class BoostTrack(object):
         return np.empty((0, 5))
 
     def dump_cache(self):
-        if self.use_ecc:
+        if self.ecc is not None:
             self.ecc.save_cache()
 
-    def get_iou_matrix(self, detections: np.ndarray) -> np.ndarray:
+    def get_iou_matrix(self, detections: np.ndarray, buffered: bool = False) -> np.ndarray:
         trackers = np.zeros((len(self.trackers), 5))
         for t, trk in enumerate(trackers):
             pos = self.trackers[t].get_state()[0]
-            trk[:] = [pos[0], pos[1], pos[2], pos[3], 0]
-        return iou_batch(detections, trackers)
+            trk[:] = [pos[0], pos[1], pos[2], pos[3], self.trackers[t].get_confidence()]
+
+        return iou_batch(detections, trackers) if not buffered else soft_biou_batch(detections, trackers)
 
     def get_mh_dist_matrix(self, detections: np.ndarray, n_dims: int = 4) -> np.ndarray:
         if len(self.trackers) == 0:
@@ -301,7 +283,7 @@ class BoostTrack(object):
 
         return ((z.reshape((-1, 1, n_dims)) - x.reshape((1, -1, n_dims))) ** 2 * sigma_inv.reshape((1, -1, n_dims))).sum(axis=2)
 
-    def do_mh_dist_confidence_boost(self, detections: np.ndarray) -> np.ndarray:
+    def duo_confidence_boost(self, detections: np.ndarray) -> np.ndarray:
         n_dims = 4
         limit = 13.2767
         mahalanobis_distance = self.get_mh_dist_matrix(detections, n_dims)
@@ -332,17 +314,44 @@ class BoostTrack(object):
                 mask[remaining_boxes] = True
 
             detections[:, 4] = np.where(mask, self.det_thresh + 1e-4, detections[:, 4])
+
         return detections
 
-    def do_iou_confidence_boost(self, detections: np.ndarray) -> np.ndarray:
-        iou_matrix = self.get_iou_matrix(detections)
-        ids = np.zeros(len(detections), dtype=np.bool_)
+    def dlo_confidence_boost(self, detections: np.ndarray, use_rich_sim: bool, use_soft_boost: bool, use_varying_th: bool) -> np.ndarray:
+        sbiou_matrix = self.get_iou_matrix(detections, True)
+        if sbiou_matrix.size == 0:
+            return detections
+        trackers = np.zeros((len(self.trackers), 6))
+        for t, trk in enumerate(trackers):
+            pos = self.trackers[t].get_state()[0]
+            trk[:] = [pos[0], pos[1], pos[2], pos[3], 0, self.trackers[t].time_since_update - 1]
 
-        if iou_matrix.size > 0 and self.frame_count > 1:
+        if use_rich_sim:
+            mhd_sim = MhDist_similarity(self.get_mh_dist_matrix(detections), 1)
+            shape_sim = shape_similarity(detections, trackers)
+            S = (mhd_sim + shape_sim + sbiou_matrix) / 3
+        else:
+            S = self.get_iou_matrix(detections, False)
 
-            max_iou = iou_matrix.max(1)
+        if not use_soft_boost and not use_varying_th:
+            max_s = S.max(1)
             coef = self.dlo_boost_coef
-            ids[(detections[:, 4] < self.det_thresh) & (max_iou * coef >= self.det_thresh)] = True
-            detections[:, 4] = np.maximum(detections[:, 4], max_iou * coef)
+            detections[:, 4] = np.maximum(detections[:, 4], max_s * coef)
+
+        else:
+            if use_soft_boost:
+                max_s = S.max(1)
+                alpha = 0.65
+                detections[:, 4] = np.maximum(detections[:, 4], alpha*detections[:, 4] + (1-alpha)*max_s**(1.5))
+            if use_varying_th:
+                threshold_s = 0.95
+                threshold_e = 0.8
+                n_steps = 20
+                alpha = (threshold_s - threshold_e) / n_steps
+                tmp = (S > np.maximum(threshold_s - trackers[:, 5] * alpha, threshold_e)).max(1)
+                scores = deepcopy(detections[:, 4])
+                scores[tmp] = np.maximum(scores[tmp], self.det_thresh + 1e-5)
+
+                detections[:, 4] = scores
 
         return detections
