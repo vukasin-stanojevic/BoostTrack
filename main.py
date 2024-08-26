@@ -8,7 +8,7 @@ from args import make_parser
 from default_settings import GeneralSettings, get_detector_path_and_im_size, BoostTrackPlusPlusSettings, BoostTrackSettings
 from external.adaptors import detector
 from tracker.GBI import GBInterpolation
-from tracker.boost_track import BoostTrackPlusPlus
+from tracker.boost_track import BoostTrack
 
 """
 Script modified from Deep OC-SORT: 
@@ -93,7 +93,7 @@ def main():
             if tracker is not None:
                 tracker.dump_cache()
 
-            tracker = BoostTrackPlusPlus(video_name=video_name)
+            tracker = BoostTrack(video_name=video_name)
 
         pred = det(img, tag)
         start_time = time.time()
