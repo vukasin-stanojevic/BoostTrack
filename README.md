@@ -76,8 +76,8 @@ python3 data/tools/convert_mot20_to_coco.py
 ### Run BoostTrack
 To run the BoostTrack on MOT17 and MOT20 validation sets run the following:
 ```shell
-python main.py --dataset mot17 --exp_name BoostTrack --det_thresh 0.6 --dlo_boost_coef 0.65 --no_reid
-python main.py --dataset mot20 --exp_name BoostTrack --det_thresh 0.4 --dlo_boost_coef 0.5 --no_reid
+python main.py --dataset mot17 --exp_name BoostTrack --no_reid --btpp_arg_iou_boost --btpp_arg_no_sb --btpp_arg_no_vt
+python main.py --dataset mot20 --exp_name BoostTrack --no_reid --btpp_arg_iou_boost --btpp_arg_no_sb --btpp_arg_no_vt
 ```
 Note, three resulting folders will be created for each experiment: BoostTrack, BoostTrack_post, BoostTrack_post_gbi. The folders with the suffixes correspond to results with applied linear and gradient boosting interpolation. 
 
@@ -89,14 +89,26 @@ python external/TrackEval/scripts/run_mot_challenge.py   --SPLIT_TO_EVAL val   -
 ### Run BoostTrack+
 Similarly, to run the BoostTrack+ run:
 ```shell
-python main.py --dataset mot17 --exp_name BoostTrackPlus --det_thresh 0.6 --dlo_boost_coef 0.65
-python main.py --dataset mot20 --exp_name BoostTrackPlus --det_thresh 0.4 --dlo_boost_coef 0.5
+python main.py --dataset mot17 --exp_name BoostTrackPlus --btpp_arg_iou_boost --btpp_arg_no_sb --btpp_arg_no_vt
+python main.py --dataset mot20 --exp_name BoostTrackPlus --btpp_arg_iou_boost --btpp_arg_no_sb --btpp_arg_no_vt
 ```
 To evaluate the BoostTrack+ results run:
 ```shell
 python external/TrackEval/scripts/run_mot_challenge.py   --SPLIT_TO_EVAL val   --GT_FOLDER results/gt/   --TRACKERS_FOLDER results/trackers/   --BENCHMARK MOT17  --TRACKERS_TO_EVAL BoostTrackPlus_post_gbi
 python external/TrackEval/scripts/run_mot_challenge.py   --SPLIT_TO_EVAL val   --GT_FOLDER results/gt/   --TRACKERS_FOLDER results/trackers/   --BENCHMARK MOT20  --TRACKERS_TO_EVAL BoostTrackPlus_post_gbi
 ```
+### Run BoostTrack++
+Finally, the default setting is to use BoostTrack++:
+```shell
+python main.py --dataset mot17 --exp_name BTPP
+python main.py --dataset mot20 --exp_name BTPP
+```
+To evaluate the BoostTrack++ results run:
+```shell
+python external/TrackEval/scripts/run_mot_challenge.py   --SPLIT_TO_EVAL val   --GT_FOLDER results/gt/   --TRACKERS_FOLDER results/trackers/   --BENCHMARK MOT17  --TRACKERS_TO_EVAL BTPP_post_gbi
+python external/TrackEval/scripts/run_mot_challenge.py   --SPLIT_TO_EVAL val   --GT_FOLDER results/gt/   --TRACKERS_FOLDER results/trackers/   --BENCHMARK MOT20  --TRACKERS_TO_EVAL BTPP_post_gbi
+```
+
 # Acknowledgements
 Our implementation is developed on top of publicly available codes. We thank authors of [Deep OC-SORT](https://github.com/GerardMaggiolino/Deep-OC-SORT/), [SORT](https://github.com/abewley/sort), [StrongSort](https://github.com/dyhBUPT/StrongSORT), [NCT](https://github.com/Autoyou/Noise-control-multi-object-tracking), [ByteTrack](https://github.com/ifzhang/ByteTrack/) for making their code available. 
 
@@ -113,6 +125,16 @@ If you find our work useful, please cite our papers:
   volume={35},
   number = {3},
   doi={10.1007/s00138-024-01531-5}
+}
+
+@article{stanojevic2024btpp,
+      title={BoostTrack++: using tracklet information to detect more objects in multiple object tracking},
+      author={Vuka\v{s}in Stanojevi\'c and Branimir Todorovi\'c},
+      year={2024},
+      eprint={2408.13003},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      doi={https://doi.org/10.48550/arXiv.2408.13003}
 }
 ```
 
