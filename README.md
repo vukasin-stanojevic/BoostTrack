@@ -1,9 +1,10 @@
 # BoostTrack/BoostTrack++ repository
 
 > [**BoostTrack: Boosting the similarity measure and detection confidence for improved multiple object tracking**](https://doi.org/10.1007/s00138-024-01531-5)
-> Vukasin Stanojevic, Branimir Todorovic
+> 
 > 
 > [**BoostTrack++: using tracklet information to detect more objects in multiple object tracking**](https://arxiv.org/abs/2408.13003)
+> 
 > Vukasin Stanojevic, Branimir Todorovic
 > 
 
