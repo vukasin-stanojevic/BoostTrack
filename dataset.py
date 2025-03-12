@@ -26,6 +26,10 @@ def get_mot_loader(dataset, test, data_dir="data", workers=4, size=(800, 1440)):
         else:
             name = "train"
             annotation = "val_half.json"
+    elif dataset == "custom":  # 사용자 정의 데이터셋 추가
+        direc = "custom_dataset"
+        name = "custom"
+        annotation = "custom_annotations.json"
     else:
         raise RuntimeError("Specify path here.")
 
