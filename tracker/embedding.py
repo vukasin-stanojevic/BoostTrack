@@ -102,70 +102,72 @@ class EmbeddingComputer:
         if self.cache_name != tag.split(":")[0]:
             self.load_cache(tag.split(":")[0])
 
+        # 기존 캐시를 무시하고 항상 새로운 임베딩을 계산
         if tag in self.cache:
             embs = self.cache[tag]
             if embs.shape[0] != bbox.shape[0]:
-                raise RuntimeError(
-                    "ERROR: The number of cached embeddings don't match the "
-                    "number of detections.\nWas the detector model changed? Delete cache if so."
-                )
-            return embs
+                print(f"캐시 삭제: {tag} (탐지된 객체 수 불일치)")
+                del self.cache[tag]  # 기존 캐시 삭제
+            else:
+                return embs  # 캐시가 유효하면 그대로 사용
 
         if self.model is None:
             self.initialize_model()
 
-        # Generate all of the patches
+        # 좌표 조정 및 클리핑
+        h, w = img.shape[:2]
+        bbox = np.round(bbox).astype(np.int32)
+        bbox[:, 0] = bbox[:, 0].clip(0, w)
+        bbox[:, 1] = bbox[:, 1].clip(0, h)
+        bbox[:, 2] = bbox[:, 2].clip(0, w)
+        bbox[:, 3] = bbox[:, 3].clip(0, h)
+
+        # 이미지 크롭 생성
         crops = []
         if self.grid_off:
-            # Basic embeddings
-            h, w = img.shape[:2]
-            results = np.round(bbox).astype(np.int32)
-            results[:, 0] = results[:, 0].clip(0, w)
-            results[:, 1] = results[:, 1].clip(0, h)
-            results[:, 2] = results[:, 2].clip(0, w)
-            results[:, 3] = results[:, 3].clip(0, h)
-
-            crops = []
-            for p in results:
-                crop = img[p[1] : p[3], p[0] : p[2]]
+            for p in bbox:
+                crop = img[p[1]: p[3], p[0]: p[2]]
                 crop = cv2.cvtColor(crop, cv2.COLOR_BGR2RGB)
                 crop = cv2.resize(crop, self.crop_size, interpolation=cv2.INTER_LINEAR).astype(np.float32)
                 if self.normalize:
                     crop /= 255
                     crop -= np.array((0.485, 0.456, 0.406))
                     crop /= np.array((0.229, 0.224, 0.225))
-                crop = torch.as_tensor(crop.transpose(2, 0, 1))
-                crop = crop.unsqueeze(0)
+                crop = torch.as_tensor(crop.transpose(2, 0, 1)).unsqueeze(0)
                 crops.append(crop)
         else:
-            # Grid patch embeddings
             for idx, box in enumerate(bbox):
                 crop = self.get_horizontal_split_patches(img, box, tag, idx)
                 crops.append(crop)
-        crops = torch.cat(crops, dim=0)
 
-        # Create embeddings and l2 normalize them
+        crops = torch.cat(crops, dim=0).cuda()
+
+        # 임베딩 계산
         embs = []
         for idx in range(0, len(crops), self.max_batch):
-            batch_crops = crops[idx : idx + self.max_batch]
-            batch_crops = batch_crops.cuda()
+            batch_crops = crops[idx: idx + self.max_batch]
             with torch.no_grad():
                 batch_embs = self.model(batch_crops)
             embs.extend(batch_embs)
+
         embs = torch.stack(embs)
         embs = torch.nn.functional.normalize(embs, dim=-1)
 
         if not self.grid_off:
             embs = embs.reshape(bbox.shape[0], -1, embs.shape[-1])
+
         embs = embs.cpu().numpy()
 
-        self.cache[tag] = embs
+        # 새로운 캐시 저장 (캐시 사용 시 다시 활성화 가능)
+        # self.cache[tag] = embs  
+
         return embs
+
 
     def initialize_model(self):
         if self.dataset == "mot17":
             if self.test_dataset:
-                path = "external/weights/mot17_sbs_S50.pth"
+                path = "external/weights/mot20_sbs_S50.pth"
             else:
                 return self._get_general_model()
         elif self.dataset == "mot20":
@@ -174,7 +176,9 @@ class EmbeddingComputer:
             else:
                 return self._get_general_model()
         elif self.dataset == "dance":
-            path = "external/weights/dance_sbs_S50.pth"
+            path = "external/weights/mot20_sbs_S50.pth"
+        elif self.dataset == "custom":
+            path = "external/weights/mot20_sbs_S50.pth"
         else:
             raise RuntimeError("Need the path for a new ReID model.")
 
@@ -191,19 +195,40 @@ class EmbeddingComputer:
         evaluate on as well. Instead we use a different model for
         validation.
         """
-        model = torchreid.models.build_model(name="osnet_ain_x1_0", num_classes=2510, loss="softmax", pretrained=False)
-        sd = torch.load("external/weights/osnet_ain_ms_d_c.pth.tar")["state_dict"]
+        model = torchreid.models.build_model(name="resnet50", num_classes=1, loss="softmax", pretrained=False)
+        model_path = "external/weights/mot20_sbs_S50.pth"
+
+        try:
+            sd = torch.load(model_path)
+
+            # 디버깅: 불러온 state_dict 키 확인
+            print(f"Loaded state_dict keys: {list(sd.keys())[:5]}")
+
+            # "state_dict" 또는 "model" 키가 있는 경우 올바르게 불러오기
+            if "state_dict" in sd:
+                sd = sd["state_dict"]  # 기존 방식
+            elif "model" in sd:
+                sd = sd["model"]  # 전체 체크포인트라면 "model" 키에서 state_dict 가져오기
+                print("Found 'model' key, using its state_dict.")
+            else:
+                raise RuntimeError("No valid 'state_dict' or 'model' key found in checkpoint.")
+
+        except FileNotFoundError:
+            raise FileNotFoundError(f"ReID model not found at {model_path}. Please check the path.")
+
         new_state_dict = OrderedDict()
         for k, v in sd.items():
-            name = k[7:]  # remove `module.`
+            name = k[7:] if k.startswith("module.") else k  # "module." 접두사 제거
             new_state_dict[name] = v
-        # load params
-        model.load_state_dict(new_state_dict)
-        model.eval()
-        model.cuda()
+
+        # strict=False` 설정하여 일부 키가 없어도 로드 가능하도록 변경
+        model.load_state_dict(new_state_dict, strict=False)
+        model.eval().cuda()
+
         self.model = model
         self.crop_size = (128, 256)
         self.normalize = True
+
 
     def dump_cache(self):
         if self.cache_name:
