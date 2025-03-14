@@ -143,4 +143,6 @@ dependencies:
       - yacs==0.1.8
       - yolox==0.3.0
       - termcolor==2.1.0
+      - streamlit==1.40
+      - streamlit-drawable-canvas==0.9.3
 prefix: /home/aims/anaconda3/envs/torch-2.1.0-3.8.1
