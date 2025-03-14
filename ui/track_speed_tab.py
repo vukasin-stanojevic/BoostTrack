@@ -157,7 +157,7 @@ def track_tab():
         cap.release()
         out.release()
         # os.remove(video_path)
-        os.unlink(video_path)
+        os.unlink(st.session_video_path)
 
         st.success("모델 실행이 완료되었습니다!")
 
