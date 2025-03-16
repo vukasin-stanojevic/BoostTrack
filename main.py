@@ -18,13 +18,13 @@ https://github.com/GerardMaggiolino/Deep-OC-SORT
 
 def get_main_args():
     parser = make_parser()
-    parser.add_argument("--dataset", type=str, default="mot17")
+    parser.add_argument("--dataset", type=str, default="mot20")
     parser.add_argument("--result_folder", type=str, default="results/trackers/")
     parser.add_argument("--test_dataset", action="store_true")
     parser.add_argument("--exp_name", type=str, default="test")
     parser.add_argument("--no_reid", action="store_true", help="mark if visual embedding should NOT be used")
     parser.add_argument("--no_cmc", action="store_true", help="mark if camera motion compensation should NOT be used")
-
+    parser.add_argument("--detector", type=str, default="yoloV11")
     parser.add_argument("--s_sim_corr", action="store_true", help="mark if you want to use corrected version of shape similarity calculation function")
 
     parser.add_argument("--btpp_arg_iou_boost", action="store_true", help="BoostTrack++ arg. Mark if only IoU should be used for detection confidence boost.")
@@ -63,7 +63,8 @@ def main():
     BoostTrackPlusPlusSettings.values['use_vt'] = not args.btpp_arg_no_vt
 
     detector_path, size = get_detector_path_and_im_size(args)
-    det = detector.Detector("yolox", detector_path, args.dataset)
+    # det = detector.Detector("yolox", detector_path, args.dataset)
+    det = detector.Detector("yoloV11", detector_path, args.dataset ,conf_thresh=args.conf)
     loader = dataset.get_mot_loader(args.dataset, args.test_dataset, size=size)
 
     tracker = None

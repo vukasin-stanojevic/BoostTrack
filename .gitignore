@@ -1,0 +1,6 @@
+deepOCenv/
+/data/mot/
+/data/MOT20/
+/external/weights/
+**/__pycache__/
+/cache/

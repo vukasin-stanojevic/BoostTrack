@@ -3,13 +3,18 @@ from typing import Union, Dict, Tuple
 
 def get_detector_path_and_im_size(args) -> Tuple[str, Tuple[int, int]]:
     if args.dataset == "mot17":
-        if args.test_dataset:
+        if args.detector == "yoloV11":
+            detector_path = "external/weights/yoloV11_best.pt"
+        elif args.test_dataset:
             detector_path = "external/weights/bytetrack_x_mot17.pth.tar"
         else:
             detector_path = "external/weights/bytetrack_ablation.pth.tar"
         size = (800, 1440)
     elif args.dataset == "mot20":
-        if args.test_dataset:
+        if args.detector == "yoloV11":
+            detector_path = "external/weights/yoloV11_best.pt"
+            size = (800, 1440)
+        elif args.test_dataset:
             detector_path = "external/weights/bytetrack_x_mot20.tar"
             size = (896, 1600)
         else:
