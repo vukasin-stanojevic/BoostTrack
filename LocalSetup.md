@@ -1,4 +1,4 @@
-# Run
+# Inference
 
 - Added Required weights from the repo
   - SBS for embedding (fast-reid)
@@ -128,21 +128,21 @@ can run the HOTA also for \_post or just BoostTrack by replacing the last argume
 rm -r cache/ results/trackers/
 ```
 
-## Experiments
+# Experiments
 
-### BoostTrack
+## BoostTrack
 
 - yoloV11: 45.755
 - yoloX mot17: 66.164
 - yoloX mot20: 75.783
 
-### BoostTrack+
+## BoostTrack+
 
 - yoloV11: 50.241
 - yoloX mot17: 68.468
 - yoloX mot20: 77.499
 
-### BoostTrack++
+## BoostTrack++
 
 - yoloV11:
 - yoloX mot17:
