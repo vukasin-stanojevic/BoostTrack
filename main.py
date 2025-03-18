@@ -63,8 +63,6 @@ def main():
     BoostTrackPlusPlusSettings.values['use_vt'] = not args.btpp_arg_no_vt
 
     detector_path, size = get_detector_path_and_im_size(args)
-    # det = detector.Detector("yolox", detector_path, args.dataset)
-    # det = detector.Detector("yoloV11", detector_path, args.dataset ,conf_thresh=args.conf)
     if args.detector == "yolox":
         det = detector.Detector("yolox", detector_path, args.dataset)
     elif args.detector == "yoloV11":
