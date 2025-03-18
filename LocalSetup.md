@@ -144,6 +144,6 @@ rm -r cache/ results/trackers/
 
 ## BoostTrack++
 
-- yoloV11:
-- yoloX mot17:
-- yoloX mot20:
+- yoloV11: 50.175
+- yoloX mot17: 68.156
+- yoloX mot20: 78.097
