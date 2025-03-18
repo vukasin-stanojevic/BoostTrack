@@ -50,7 +50,7 @@ if __name__ == "__main__":
         trackeval.datasets.MotChallenge2DBox.get_default_dataset_config()
     )
     default_metrics_config = {
-        "METRICS": ["HOTA", "CLEAR", "Identity"],
+        "METRICS": ["HOTA"],  #, "CLEAR", "Identity"],
         "THRESHOLD": 0.5,
     }
     config = {

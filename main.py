@@ -64,7 +64,12 @@ def main():
 
     detector_path, size = get_detector_path_and_im_size(args)
     # det = detector.Detector("yolox", detector_path, args.dataset)
-    det = detector.Detector("yoloV11", detector_path, args.dataset ,conf_thresh=args.conf)
+    # det = detector.Detector("yoloV11", detector_path, args.dataset ,conf_thresh=args.conf)
+    if args.detector == "yolox":
+        det = detector.Detector("yolox", detector_path, args.dataset)
+    elif args.detector == "yoloV11":
+        det = detector.Detector(model_type="yoloV11", path=detector_path,dataset=args.dataset, conf_thresh=args.conf, iou=args.nms)
+    print("Model : ", det.model_type)
     loader = dataset.get_mot_loader(args.dataset, args.test_dataset, size=size)
 
     tracker = None
