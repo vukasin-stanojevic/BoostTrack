@@ -24,9 +24,9 @@ python main.py --dataset mot20 --exp_name BoostTrack --no_reid --btpp_arg_iou_bo
 by default yoloV11 is the detector, however it can be replaced with yolox.  
 the default is yolox pretrained on MOT17  
 to change to yolox pretrained on MOT20
-change line 18 in default\*settings.py to
+change line 18 in default*settings.py to
 `detector_path = "external/weights/bytetrack_x_mot20.tar"`  
-**_NOTE you should have this weight in the path_**
+\*\*\_NOTE you should have this weight in the path*\*\*
 
 - To Get HOTA Score  
   To change the pathName assuming you delete results/trackers after each experiment
@@ -63,9 +63,9 @@ python main.py --dataset mot20 --exp_name BoostTrackPlus --btpp_arg_iou_boost --
 by default yoloV11 is the detector, however it can be replaced with yolox.  
 the default is yolox pretrained on MOT17  
 to change to yolox pretrained on MOT20
-change line 18 in default\*settings.py to
+change line 18 in default*settings.py to
 `detector_path = "external/weights/bytetrack_x_mot20.tar"`  
-**_NOTE you should have this weight in the path_**
+\*\*\_NOTE you should have this weight in the path*\*\*
 
 - To Get HOTA Score  
   To change the pathName assuming you delete results/trackers after each experiment
@@ -102,9 +102,9 @@ python main.py --dataset mot20 --exp_name BTPP --test_dataset --detector "yoloV1
 by default yoloV11 is the detector, however it can be replaced with yolox.  
 the default is yolox pretrained on MOT17  
 to change to yolox pretrained on MOT20
-change line 18 in default\*settings.py to
+change line 18 in default*settings.py to
 `detector_path = "external/weights/bytetrack_x_mot20.tar"`  
-**_NOTE you should have this weight in the path_**
+\*\*\_NOTE you should have this weight in the path*\*\*
 
 - To Get HOTA Score  
   To change the pathName assuming you delete results/trackers after each experiment
