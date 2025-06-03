@@ -33,7 +33,7 @@ Handling unreliable detections and avoiding identity switches are crucial for th
 |BoostTrack++ | 66.4 | 77.7  | 82.0 | 762 |
 
 ## Installation
-We tested the code on Ubuntu 22.04.
+We tested the code on Ubuntu 22.04. and the desktop with 13th Gen Intel(R) Core(TM) i9-13900K CPU and NVIDIA GeForce RTX 3080 GPU.
 
 **Step 1.** Download repository and set up the conda environment.
 
