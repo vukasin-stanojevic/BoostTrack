@@ -129,13 +129,14 @@ If you find our work useful, please cite our papers:
 }
 
 @article{stanojevic2024btpp,
-      title={BoostTrack++: using tracklet information to detect more objects in multiple object tracking},
-      author={Vuka\v{s}in Stanojevi\'c and Branimir Todorovi\'c},
-      year={2024},
-      eprint={2408.13003},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV},
-      doi={https://doi.org/10.48550/arXiv.2408.13003}
+  title={BoostTrack++: using tracklet information to detect more objects in multiple object tracking},
+  author={Stanojevi{\'c}, Vuka{\v{s}}in and Todorovi{\'c}, Branimir},
+  journal={Filomat},
+  volume={39},
+  number={16},
+  pages={5685--5702},
+  year={2025},
+  doi={https://doi.org/10.2298/FIL2516685S}
 }
 ```
 
